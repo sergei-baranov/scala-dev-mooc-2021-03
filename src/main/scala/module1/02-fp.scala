@@ -143,7 +143,7 @@ object hof{
    // Dog extend Animal
   // Option[Dog] Option[Animal]
 
-   sealed trait Option[+A]{
+  sealed trait Option[+A]{
     def isEmpty: Boolean = this match {
       case Option.Some(_) => false
       case Option.None => true
@@ -165,15 +165,85 @@ object hof{
       case Option.None => Option.None
     }
 
-    def flatMap[B](f: A => Option[B]): Option[B] = ???
+    //def flatMap[B](f: A => Option[B]): Option[B] = ???
+    /**
+     * flatMap
+     * реализуем по сигнатуре flatMap() для оригинального Option:
+     * final def flatMap[B](f: A => Option[B]): Option[B]
+     */
+    def flatMap[B](f: A => Option[B]): Option[B] = this match {
+      case Option.Some(v) => f(v)
+      case Option.None => Option.None
+    }
 
-    // val i : Option[Int]  i.map(v => v + 1)
+    /*
+     * printIfAny
+     * Реализовать метод printIfAny, который будет печатать значение, если оно есть
+     */
+    def printIfAny[A](): Unit = this match {
+      case Option.Some(v) => println(v.toString)
+      case Option.None => () // do nothing
+    }
+
+    /*
+     * filter
+     * Реализовать метод filter, который будет возвращать не пустой Option
+     * в случае если исходный не пуст и предикат от значения = true
+     */
+    // missing parameter type for expanded function
+    // The argument types of an anonymous function must be fully known. (SLS 8.5)
+    /*
+    def filter[A](f: A => Boolean): Option[A] = this match {
+      case Option.Some(v) if (f(v)) => Option.Some(v)
+      case _ => Option.None
+    }
+    */
+    // методом тыка получилось с [B >: A],
+    // но я не скажу, что понял, почему была ошибка выше и почему работает так:
+    def filter[B >: A](f: B => Boolean): Option[A] = this match {
+      case Option.Some(v) if (f(v)) => Option.Some(v)
+      case _ => Option.None
+    }
+    // вот так, кстати, тоже работает (A => Boolean):
+    /*
+    def filter[B >: A](f: A => Boolean): Option[A] = this match {
+      case Option.Some(v) if (f(v)) => Option.Some(v)
+      case _ => Option.None
+    }
+    */
+
+    /*
+     * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
+     */
+    // type mismatch;
+    // found   : v.type (with underlying type A)
+    // required: A
+    /*
+    def zip[A, B](that: B): Option[(A, B)] = this match {
+      case Option.Some(v) if Option.Some(that) != Option.None => Option.Some((v, that))
+      case _ => Option.None
+    }
+    */
+    // сигнатуру подсмотрел у скалы (опять A1 >: A)
+    /*
+    def zip[A1 >: A, B](that: B): Option[(A1, B)] = this match {
+      case Option.Some(v) if Option.Some(that) != Option.None => Option.Some((v, that))
+      case _ => Option.None
+    }
+    */
+    // и ещё раз подсмотрел сигнатуру (that: Option[B]),
+    // реализовал методом избавлений от красных подчёркиваний
+    def zip[A1 >: A, B](that: Option[B]): Option[(A1, B)] = this match {
+      case Option.Some(v) if !that.isEmpty => Option.Some((v, that.get))
+      case _ => Option.None
+    }
 
 
+    /*
     def f(x: Int, y: Int): Option[Int] =
       if(y == 0) Option.None
       else Option.Some(x / y)
-
+    */
 
   }
 
@@ -187,6 +257,7 @@ object hof{
    *
    * Реализовать метод printIfAny, который будет печатать значение, если оно есть
    */
+
 
   /**
    *
